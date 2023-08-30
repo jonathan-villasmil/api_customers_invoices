@@ -9,7 +9,7 @@ use App\Http\Requests\UpdateCustomerRequest;
 use App\Http\Resources\Api\CustomerCollection;
 use App\Http\Resources\Api\CustomerResource;
 use Illuminate\Http\Request;
-use App\Services\CustomerQuery;
+use App\Filters\v1\CustomersFilter;
 
 class CustomerController extends Controller
 {
@@ -19,21 +19,18 @@ class CustomerController extends Controller
     public function index(Request $request)
     {
         //creamos un nuevo objeto
-        $filter = new CustomerQuery();
+        $filter = new CustomersFilter();
 
         //elementos que se construirá a partir de la clase
         $queryItems = $filter->transform($request);// [['column', 'operator', 'value']]
 
         //verificamos
         if(count($queryItems) == 0){
-            return new CustomerCollection(Customer::paginate(100));
+            return new CustomerCollection(Customer::paginate());
         }else{
-            return new CustomerCollection(Customer::where($queryItems)->paginate(100));
-        }
-
-        
-
-        
+            $customers = Customer::where($queryItems)->paginate();
+            return new CustomerCollection($customers->appends($request->query()));
+        } 
     }
 
     /**
