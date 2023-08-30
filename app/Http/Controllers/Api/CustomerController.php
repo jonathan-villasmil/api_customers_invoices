@@ -8,19 +8,32 @@ use App\Http\Requests\StoreCustomerRequest;
 use App\Http\Requests\UpdateCustomerRequest;
 use App\Http\Resources\Api\CustomerCollection;
 use App\Http\Resources\Api\CustomerResource;
-
-
-
-
+use Illuminate\Http\Request;
+use App\Services\CustomerQuery;
 
 class CustomerController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        return new CustomerCollection(Customer::paginate());
+        //creamos un nuevo objeto
+        $filter = new CustomerQuery();
+
+        //elementos que se construirá a partir de la clase
+        $queryItems = $filter->transform($request);// [['column', 'operator', 'value']]
+
+        //verificamos
+        if(count($queryItems) == 0){
+            return new CustomerCollection(Customer::paginate(100));
+        }else{
+            return new CustomerCollection(Customer::where($queryItems)->paginate(100));
+        }
+
+        
+
+        
     }
 
     /**
