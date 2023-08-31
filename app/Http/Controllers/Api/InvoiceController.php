@@ -26,15 +26,15 @@ class InvoiceController extends Controller
         $filter = new InvoicesFilter();
 
         //elementos que se construirá a partir de la clase
-        $queryItems = $filter->transform($request);// [['column', 'operator', 'value']]
+        $queryItems = $filter->transform($request); // [['column', 'operator', 'value']]
 
         //verificamos
-        if(count($queryItems) == 0){
+        if (count($queryItems) == 0) {
             return new InvoiceCollection(Invoice::paginate());
-        }else{
+        } else {
             $invoices = Invoice::where($queryItems)->paginate();
             return new InvoiceCollection($invoices->appends($request->query()));
-        } 
+        }
     }
 
     /**
@@ -51,16 +51,16 @@ class InvoiceController extends Controller
     public function store(StoreInvoiceRequest $request)
     {
         return new InvoiceResource(Invoice::create($request->all()));
-
     }
 
-    public function bulkStore(BulkStoreInvoiceRequest $request){
+    public function bulkStore(BulkStoreInvoiceRequest $request)
+    {
 
-       $bulk = collect($request->all())->map(function($arr, $key){
+        $bulk = collect($request->all())->map(function ($arr, $key) {
             return Arr::except($arr, ['customerId', 'billedDate', 'paidDate']);
-       });
+        });
 
-       Invoice::insert($bulk->toArray());
+        Invoice::insert($bulk->toArray());
     }
 
     /**
@@ -84,7 +84,7 @@ class InvoiceController extends Controller
      */
     public function update(UpdateInvoiceRequest $request, Invoice $invoice)
     {
-        //
+        $invoice->update($request->all());
     }
 
     /**
@@ -92,6 +92,19 @@ class InvoiceController extends Controller
      */
     public function destroy(Invoice $invoice)
     {
-        //
+        // Verificar si el cliente existe
+        if (!$invoice) {
+            return response()->json(['error' => 'Cliente no encontrado'], 404);
+        }
+
+        // Eliminar el cliente de la base de datos
+        $invoice->delete();
+
+        return response()->json(['message' => 'Cliente eliminado exitosamente']);
+
+        // $invoice->delete();
+
+        // return redirect()->route('invoices')
+        //     ->with('success', 'Invoice deleted successfully');
     }
 }

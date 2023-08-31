@@ -24,20 +24,18 @@ class CustomerController extends Controller
         $filter = new CustomersFilter();
 
         //elementos que se construirá a partir de la clase
-        $filterItems = $filter->transform($request);// [['column', 'operator', 'value']]
+        $filterItems = $filter->transform($request); // [['column', 'operator', 'value']]
 
         //incluir la relacion entre customers e invoices
         $includeInvoices = $request->query('includeInvoices');
 
         $customers = Customer::where($filterItems);
-        
-        if($includeInvoices){
+
+        if ($includeInvoices) {
             $customers = $customers->with('invoices');
         }
-        
-        return new CustomerCollection($customers->paginate()->appends($request->query()));
 
-        
+        return new CustomerCollection($customers->paginate()->appends($request->query()));
     }
 
     /**
@@ -65,7 +63,7 @@ class CustomerController extends Controller
         $includeInvoices = request()->query('includeInvoices');
 
         //validamos que exista
-        if($includeInvoices){
+        if ($includeInvoices) {
             return new CustomerResource($customer->loadMissing('invoices'));
         }
 
@@ -93,6 +91,20 @@ class CustomerController extends Controller
      */
     public function destroy(Customer $customer)
     {
-        //
+        // Verificar si el cliente existe
+        if (!$customer) {
+            return response()->json(['error' => 'Cliente no encontrado'], 404);
+        }
+
+        // Eliminar el cliente de la base de datos
+        $customer->delete();
+
+        return response()->json(['message' => 'Cliente eliminado exitosamente']);
+        
+        
+        // $customer->delete();
+
+        // return redirect()->route('customers')
+        //     ->with('success', 'Customer deleted successfully');
     }
 }
