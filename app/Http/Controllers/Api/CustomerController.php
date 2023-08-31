@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Customer;
-use App\Http\Requests\StoreCustomerRequest;
-use App\Http\Requests\UpdateCustomerRequest;
+use App\Http\Requests\v1\StoreCustomerRequest;
+use App\Http\Requests\v1\UpdateCustomerRequest;
 use App\Http\Resources\Api\CustomerCollection;
 use App\Http\Resources\Api\CustomerResource;
 use Illuminate\Http\Request;
 use App\Filters\v1\CustomersFilter;
+
+
 
 class CustomerController extends Controller
 {
@@ -51,7 +53,7 @@ class CustomerController extends Controller
      */
     public function store(StoreCustomerRequest $request)
     {
-        //
+        return new CustomerResource(Customer::create($request->all()));
     }
 
     /**
