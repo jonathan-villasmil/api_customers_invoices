@@ -3,14 +3,15 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Invoice;
-use App\Http\Requests\StoreInvoiceRequest;
-use App\Http\Requests\UpdateInvoiceRequest;
+use App\Http\Requests\v1\StoreInvoiceRequest;
+use App\Http\Requests\v1\UpdateInvoiceRequest;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\Api\InvoiceCollection;
 use App\Http\Resources\Api\InvoiceResource;
 use App\Filters\v1\InvoicesFilter;
+use App\Http\Requests\v1\BulkStoreInvoiceRequest;
 use Illuminate\Http\Request;
-
+use Illuminate\Support\Arr;
 
 
 
@@ -49,7 +50,17 @@ class InvoiceController extends Controller
      */
     public function store(StoreInvoiceRequest $request)
     {
-        //
+        return new InvoiceResource(Invoice::create($request->all()));
+
+    }
+
+    public function bulkStore(BulkStoreInvoiceRequest $request){
+
+       $bulk = collect($request->all())->map(function($arr, $key){
+            return Arr::except($arr, ['customerId', 'billedDate', 'paidDate']);
+       });
+
+       Invoice::insert($bulk->toArray());
     }
 
     /**
